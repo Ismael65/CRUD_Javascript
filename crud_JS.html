@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>CRUD con JavaScript</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <style type="text/css">
+            .ventana{
+                /*background: rgba(0,0,102,1);*/
+                width: 30%;
+                color: rgba(13,12,242,1);
+                font-family: sans-serif, Helvetica, Arial;
+                font-size: 18px;
+                text-align: center;
+                padding: 33px;
+                main-height: 250px;
+                border-radius: 22px;
+                position: absolute;
+                left: 34%;
+                top: 10%;
+                display: none;
+            }            
+            #abrirVentana{                
+                width: 30%;
+                position: absolute;
+                left: 3%;
+                top: 3%;
+            }
+            #cerrar img{
+                position: absolute;
+                right: 3px;
+                top: 1px;
+            }
+            
+            .col-md-5{
+                float: left;
+            }
+            .col-md-7{
+                float: right;
+            }
+        </style>
+        <script>
+            function abrir(){
+                document.getElementById("modal-id").style.display="block";
+            }
+            function cerrar(){
+                document.getElementById("modal-id").style.display="none";
+            }
+        </script> 
+    </head>
+    <body>
+        <div class="container">
+            <br>
+            <div class="row">
+
+                <!--MODAL 2-->
+                <section id="contenedor">
+                    <!--<a href="javascript: abrir()" id="abrirVentana">Abrir Ventana</a>-->
+                </section>
+
+                <div class="ventana" id="modal-id">
+                    <div id="cerrar">
+                        <a href="javascript: cerrar()"><img src="imagen/cerrar.png" width="30"/></a><br>
+
+                        <form action="javascript:void(0);" method="post" onsubmit="aplicacion.actualizar()">
+                            <h5 class="modal-title">Editar Empleado</h5>
+                            <div class="mb-3">
+                                <label for="idEditar" class="form-label">ID</label>
+                                <input readonly type="text" name="idEditar" id="idEditar" placeholder="ID">
+                            </div>
+                            <div class="mb-3">
+                                <label for="nombreEditar" class="form-label">Nombre</label>
+                                <input type="text" required name="nombreEditar" id="nombreEditar" placeholder="nombre del empleado">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="correoEditar" class="form-label">Correo</label>
+                                <input type="email" required name="correoEditar" id="correoEditar" placeholder="correo del empleado">
+                            </div>                        
+
+                            <button type="button" class="btn-secundary" onclick="cerrar()">Cerrar</button>
+                            <button type="submit" class="btn-success">Actualizar</button>
+                        </form>
+                    </div>
+                </div>
+
+                <br>        
+
+                <div class="col-md-5">
+
+                    <div class="card">
+                        <div class="card-header">
+                            Empleados
+                        </div>
+                        <div class="card-body">
+
+                            <form action="javascript:void(0);" method="post" onsubmit="aplicacion.agregar()">
+                                <div class="mb-3">
+                                    <label for="nombre" class="form-label">Nombre</label>
+                                    <input type="text" required name="nombre" id="nombre" placeholder="nombre del empleado">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="correo" class="form-label">Correo</label>
+                                    <input type="email" required name="correo" id="correo" placeholder="correo del empleado">
+                                </div>
+                                <button type="submit" class="btn btn-success">Agregar Empleado</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <td>Id</td>
+                                <td>Nombre</td>
+                                <td>Correo</td>
+                                <td>Acciones</td>
+                            </tr>
+                        </thead>
+                        <tbody id="empleados">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            var url = "http://localhost/empleados/index.php";
+            
+            var modal = document.getElementById("modal-id");
+            
+            var aplicacion = new function(){
+                this.idEditar = document.getElementById("idEditar");
+                this.nombreEditar = document.getElementById("nombreEditar");        
+                this.correoEditar = document.getElementById("correoEditar");
+                
+                this.nombre = document.getElementById("nombre");
+                this.correo = document.getElementById("correo");
+        
+                this.empleados = document.getElementById("empleados");
+                
+                this.leer = function(){
+                    var datos="";
+                    
+                    fetch(url)
+                            .then(r=>r.json())
+                            .then((respuesta)=>{
+                                console.log(respuesta);                    
+                        
+                             respuesta.map(
+                                function(empleado, index, array){
+                                    datos += "<tr>";
+                                    datos += "<td>" + empleado.id + "</td>";
+                                    datos += "<td>" + empleado.nombre + "</td>";
+                                    datos += "<td>" + empleado.correo + "</td>";
+                                            datos += '<td><button type="button" name="editar" id="editar" onclick="aplicacion.editar(' + empleado.id + ')">Editar</button><button type="button" name="borrar" id="borrar" onclick="aplicacion.borrar(' + empleado.id + ')">Borrar</button>' + "</td>";
+                                            datos += "</tr>";
+                                        }
+                                );
+                                return this.empleados.innerHTML = datos;
+                            })
+                            .catch(console.log);
+                };
+                this.agregar = function(){
+                    console.log(nombre.value);
+                    console.log(correo.value);
+
+                    var datosEnviar = {nombre: this.nombre.value, correo: this.correo.value};
+
+                    fetch(url + "?insertar=1", {method: "POST", body: JSON.stringify(datosEnviar)})
+                            .then(respuesta => respuesta.json())
+                            .then((datosRespuesta) => {
+                                console.log("Insertados");
+                                this.leer();
+                            })
+                            .catch(console.log);
+                };
+                this.borrar = function (id) {
+                    console.log(id);
+
+                    fetch(url + "?borrar=" + id)
+                            .then(respuesta => respuesta.json())
+                            .then((datosRespuesta) => {
+                                this.leer();
+                            })
+                            .catch(console.log);
+                    cerrar();
+                };
+                this.editar = function (id) {
+                    console.log(id);
+
+                    fetch(url + "?consultar=" + id)
+                            .then(respuesta => respuesta.json())
+                            .then((datosRespuesta) => {
+                                console.log(datosRespuesta);
+
+                                this.nombreEditar.value = datosRespuesta[0]["nombre"];
+                                this.idEditar.value = datosRespuesta[0]["id"];
+                                this.correoEditar.value = datosRespuesta[0]["correo"];
+
+                            })
+                            .catch(console.log);
+
+                    abrir();
+                };
+                this.actualizar = function(){
+
+                    var datosEnviar = {id: this.idEditar.value, nombre: this.nombreEditar.value, correo: this.correoEditar.value}
+
+                    console.log(idEditar.value);
+                    console.log(nombreEditar.value);
+                    console.log(correoEditar.value);
+
+                    fetch(url + "?actualizar=1", {method: "POST", body: JSON.stringify(datosEnviar)})
+                            .then(respuesta => respuesta.json())
+                            .then((datosRespuesta) => {
+                                console.log("Actualizados");
+                                this.leer();
+                                cerrar();
+
+                            })
+                            .catch(console.log);
+                };
+            };
+
+            aplicacion.leer();
+        </script>
+
+
+    </body>
+</html>
